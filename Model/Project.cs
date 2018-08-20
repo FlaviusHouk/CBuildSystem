@@ -5,21 +5,21 @@ using System.Xml.Serialization;
 
 namespace CBuildSystem.Model
 {
-    class Project
+    public class Project
     {
         public static bool LoadOrCreateProject(string path, out Project proj)
         {
             bool isNew = !File.Exists(path);
-            
+            XmlSerializer serializer = new XmlSerializer(typeof(Project));
+
             if(isNew)
             {
-                File.Create(path);
+                Stream file = File.Create(path);
                 proj = new Project(path);
+                serializer.Serialize(file, proj);
             }
             else
             {
-                XmlSerializer serializer = new XmlSerializer(typeof(Project));
-
                 using(Stream file = File.Open(path, FileMode.Open, FileAccess.ReadWrite))
                 {
                     proj = serializer.Deserialize(file) as Project;
@@ -35,6 +35,9 @@ namespace CBuildSystem.Model
         {
             _loc = fullName;
         }
+
+        public Project()
+        {}
 
         public List<SourceFile> SourceFiles { get; } = new List<SourceFile>();
     }

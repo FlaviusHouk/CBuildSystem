@@ -2,7 +2,7 @@ using System;
 
 namespace CBuildSystem.Model
 {
-    class SourceFile
+    public class SourceFile
     {
         private string _path;
         
@@ -10,5 +10,8 @@ namespace CBuildSystem.Model
         {
             _path = path;            
         }
+
+        public SourceFile()
+        {}
     }
 }
