@@ -32,7 +32,7 @@ namespace CBuildSystem
             new CommandInfo("--build", 4, 4, ProcessBuildCommand)
         };
         private List<CommandInfo> _commands = new List<CommandInfo>();
-
+        private static Project p = null;
         private void ParseCommands(string[] args)
         {
             for(int i = 0; i<args.Length; i++)
@@ -89,7 +89,6 @@ namespace CBuildSystem
         {
             string path = info.Arguments.First();
 
-            Project p = null;
             bool isNew = Project.LoadOrCreateProject(path, out p); 
 
             if(!isNew)
@@ -99,13 +98,36 @@ namespace CBuildSystem
         }
 
         private static void ProcessAddCommand(CommandInfo info)
-        {}
+        {
+            if(p == null)
+            {
+                string projPath = info.Arguments.First();
+                info.Arguments.Remove(projPath);
+
+                Project.LoadOrCreateProject(projPath, out p);
+            }
+
+            foreach(string file in info.Arguments)
+            {
+                p.AddFile(file);
+            }
+
+            p.SaveProject();
+        }
 
         private static void ProcessDeleteCommand(CommandInfo info)
         {}
 
         private static void ProcessBuildCommand(CommandInfo info)
-        {}
+        {
+            if(p == null)
+            {
+                string projPath = info.Arguments.First();
+                Project.LoadOrCreateProject(projPath, out p);
+            }
+
+            p.Build();
+        }
 
         private void PrintErrorMessage()
         {}
