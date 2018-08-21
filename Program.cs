@@ -138,7 +138,6 @@ namespace CBuildSystem
         static void Main(string[] args)
         {
             CommandParser pars = new CommandParser(args);
-
             pars.PerformActions();
         }
     }
