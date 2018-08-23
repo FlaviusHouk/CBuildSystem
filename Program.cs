@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using CBuildSystem.Model;
+using System.IO;
 
 namespace CBuildSystem
 {
@@ -29,7 +30,8 @@ namespace CBuildSystem
             new CommandInfo("--create", 1, 1, ProcessCreateCommand),
             new CommandInfo("--addFile", -1, 2, ProcessAddCommand),
             new CommandInfo("--deleteFile", -1, 3, ProcessDeleteCommand),
-            new CommandInfo("--build", 4, 4, ProcessBuildCommand)
+            new CommandInfo("--addDependency", 1, 4, ProcessAddDepCommand),
+            new CommandInfo("--build", -1, 5, ProcessBuildCommand)
         };
         private List<CommandInfo> _commands = new List<CommandInfo>();
         private static Project p = null;
@@ -95,6 +97,33 @@ namespace CBuildSystem
             {
                 throw new ArgumentException("Path is wrong. Project cannot be created");
             }
+
+            string projLoc = Path.GetDirectoryName(path);
+
+            if(Directory.Exists($"{projLoc}/src"))
+            {
+                var sources = Directory.GetFiles($"{projLoc}/src")
+                                       .Where(file => string.Compare(Path.GetExtension(file), ".c") == 0);
+
+                foreach(string sourceFile in sources)
+                {
+                    p.AddFile(sourceFile);
+                }
+            }
+            else
+            {
+                Directory.CreateDirectory($"{projLoc}/src");
+            }
+
+
+            if(!Directory.Exists($"{projLoc}/headers"))
+            {
+                Directory.CreateDirectory($"{projLoc}/headers");
+            }
+
+            p.IncludeFolders.Add($"{projLoc}/headers");
+
+            p.SaveProject();
         }
 
         private static void ProcessAddCommand(CommandInfo info)
@@ -116,8 +145,40 @@ namespace CBuildSystem
         }
 
         private static void ProcessDeleteCommand(CommandInfo info)
-        {}
+        {
+            if(p == null)
+            {
+                string projPath = info.Arguments.First();
+                info.Arguments.Remove(projPath);
 
+                Project.LoadOrCreateProject(projPath, out p);
+            }
+
+            foreach(string file in info.Arguments)
+            {
+                p.RemoveFile(file);
+            }
+
+            p.SaveProject();
+        }
+
+        private static void ProcessAddDepCommand(CommandInfo info)
+        {
+            if(p == null)
+            {
+                string projPath = info.Arguments.First();
+                info.Arguments.Remove(projPath);
+
+                Project.LoadOrCreateProject(projPath, out p);
+            }
+
+            foreach(string dep in info.Arguments)
+            {
+                p.SystemDeps.Add(dep);
+            }
+
+            p.SaveProject();
+        }
         private static void ProcessBuildCommand(CommandInfo info)
         {
             if(p == null)
