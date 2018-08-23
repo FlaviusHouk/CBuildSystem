@@ -67,6 +67,8 @@ namespace CBuildSystem.Model
         [XmlArray("SystemDependencies"), XmlArrayItem(typeof(string))]
         public List<string> SystemDeps { get; } = new List<string>();
 
+        public ProjectProperties Properties { get; } = new ProjectProperties();
+
         #endregion
 
         #region PublicProjectMethods
@@ -110,8 +112,10 @@ namespace CBuildSystem.Model
 
             if(!Directory.Exists(objFolder))
             {
-                    Directory.CreateDirectory(objFolder);
+                Directory.CreateDirectory(objFolder);
             }
+
+            System.Console.WriteLine("Builing...");
 
             foreach(SourceFile file in SourceFiles)
             {
@@ -125,6 +129,7 @@ namespace CBuildSystem.Model
 
             if (objFiles.Any())
             {
+                System.Console.WriteLine("Linking...");
                 string link = BuildLinkString().Trim('\n');
                 StringBuilder sb = new StringBuilder(link);
 
