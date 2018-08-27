@@ -8,6 +8,8 @@ using System.Linq;
 using System.Diagnostics;
 using System.Text;
 
+using CBuildSystem.Helpers;
+
 namespace CBuildSystem.Model
 {
     [Serializable]
@@ -121,7 +123,7 @@ namespace CBuildSystem.Model
             {
                 string fileName = Path.GetFileNameWithoutExtension(file.Path);      
 
-                RunGCC($"-c {file.Path} -o {objFolder}/{fileName}.o {includes}");
+                ExternalPrograms.RunCompiler($"-c {file.Path} -o {objFolder}/{fileName}.o {includes}");
             }
 
             var objFiles = Directory.GetFiles(objFolder)
@@ -143,26 +145,12 @@ namespace CBuildSystem.Model
 
                 sb.Append($"-o {binFolder}/{outName}.lef");
 
-                RunGCC(sb.ToString());
+                ExternalPrograms.RunCompiler(sb.ToString());
             }
         }
 
         #endregion
-        private void RunGCC(string args)
-        {
-                ProcessStartInfo info = new ProcessStartInfo("gcc");
-                info.Arguments = args;
-                info.RedirectStandardOutput = true;
-                info.RedirectStandardError = true;
-
-                Console.WriteLine(args);
-
-                Process proc = Process.Start(info);
-
-                proc.WaitForExit();
-
-                Console.Write(proc.StandardError.ReadToEnd());
-        }
+        
 
 
         private string BuildIncludeString()
@@ -176,7 +164,7 @@ namespace CBuildSystem.Model
 
             foreach(string dep in SystemDeps)
             {
-                includes.Append($" {RunPkgConfig(dep, true)}");
+                includes.Append($" {ExternalPrograms.RunPkgConfig(dep, true)}");
             }          
 
             return includes.ToString();
@@ -190,38 +178,24 @@ namespace CBuildSystem.Model
 
             foreach(string dep in SystemDeps)
             {
-                includes.Append($" {RunPkgConfig(dep, false)}");
+                includes.Append($" {ExternalPrograms.RunPkgConfig(dep, false)}");
             }          
 
             return includes.ToString();
         }
 
-        private string RunPkgConfig(string pkgName, bool include)
+        private string BuildPropertiesString()
         {
-            ProcessStartInfo info = new ProcessStartInfo("pkg-config");
+            StringBuilder sb = new StringBuilder();
 
-            if(include)
+            foreach(string append in Properties.Properties
+                                               .Where(prop=>prop.IsUsed)
+                                               .Select(prop=>prop.StringParametr))
             {
-                info.Arguments = $" --cflags {pkgName}";
+                sb.Append($" {append}");
             }
-            else
-            {
-                info.Arguments = $" --libs {pkgName}";
-            }
-            
-            info.RedirectStandardOutput = true;
-            info.RedirectStandardError = true;
 
-            Process proc = Process.Start(info);
-
-            proc.WaitForExit();
-
-            string toRet = proc.StandardOutput.ReadToEnd();
-
-            if(string.IsNullOrEmpty(toRet) || toRet.Contains("not found"))
-                throw new Exception($"Could not locate {pkgName} in current system");
-
-            return toRet;
+            return sb.ToString();
         }
 
         #region Serialization
