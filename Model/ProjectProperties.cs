@@ -10,6 +10,7 @@ namespace CBuildSystem.Model
     [Serializable]
     public class ProjectProperties : IXmlSerializable
     {
+        [XmlArray("CompilerProperties"), XmlArrayItem(typeof(CompilerProperty))]
         internal List<CompilerProperty> Properties { get; } 
            = new List<CompilerProperty>();
 
@@ -40,7 +41,9 @@ namespace CBuildSystem.Model
             Properties.Add(new CompilerProperty(GCCPropertiesEnum.EndianProperty, ""));
         }
         public ProjectProperties()
-        {}
+        {
+            AddGCCProps();
+        }
         
         #region CDialectOptionsProperties
         public bool IsAnsi
@@ -501,12 +504,19 @@ namespace CBuildSystem.Model
 
         public void ReadXml(XmlReader reader)
         {
-            throw new NotImplementedException();
+            reader.Read();
+
+            XmlSerializer serializer = new XmlSerializer(typeof(List<CompilerProperty>), new XmlRootAttribute("CompilerProperties"));
+            Properties.AddRange(serializer.Deserialize(reader) as List<CompilerProperty>);
         }
 
         public void WriteXml(XmlWriter writer)
         {
-            throw new NotImplementedException();
+            XmlSerializerNamespaces ns = new XmlSerializerNamespaces();
+            ns.Add("", "");
+
+            XmlSerializer serializer = new XmlSerializer(typeof(List<CompilerProperty>), new XmlRootAttribute("CompilerProperties"));
+            serializer.Serialize(writer, Properties, ns);
         }
     }
 }

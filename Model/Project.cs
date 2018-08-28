@@ -246,6 +246,9 @@ namespace CBuildSystem.Model
 
             serializer = new XmlSerializer(typeof(List<string>), new XmlRootAttribute("SystemDependencies"));
             serializer.Serialize(writer, SystemDeps, ns);
+
+            serializer = new XmlSerializer(typeof(ProjectProperties), new XmlRootAttribute("ProjectProperties"));
+            serializer.Serialize(writer, Properties);
         }
 
         #endregion
