@@ -20,7 +20,7 @@ namespace CBuildSystem.Model
             Properties.Add(new CompilerProperty(GCCPropertiesEnum.StandardProperty, "-std="));
             Properties.Add(new CompilerProperty(GCCPropertiesEnum.GNU89InlineProperty, "-fgnu89-inline"));
             Properties.Add(new CompilerProperty(GCCPropertiesEnum.StandardFLTEvalProperty, "-fpermitted-flt-eval-methods="));//toDo: check params
-            Properties.Add(new CompilerProperty(GCCPropertiesEnum.AuxInfoProperty, "-aux-info", true));
+            Properties.Add(new CompilerProperty(GCCPropertiesEnum.AuxInfoProperty, "-aux-info ", true));
             Properties.Add(new CompilerProperty(GCCPropertiesEnum.ParameterlessVariadicFunctionsAllowedProperty, "-fallow-parameterless-variadic-functions"));
             Properties.Add(new CompilerProperty(GCCPropertiesEnum.FNO_ASMProperty, "-fno-asm"));
             Properties.Add(new CompilerProperty(GCCPropertiesEnum.BuiltFuncIgnoredProperty, "-fno-builtin"));

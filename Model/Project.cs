@@ -111,6 +111,7 @@ namespace CBuildSystem.Model
             string objFolder = Path.Combine(projectLocation, "obj");
             string binFolder = Path.Combine(projectLocation, "bin");
             string includes = BuildIncludeString().Trim('\n');
+            string propStr = BuildPropertiesString().Trim('\n');
 
             if(!Directory.Exists(objFolder))
             {
@@ -123,7 +124,7 @@ namespace CBuildSystem.Model
             {
                 string fileName = Path.GetFileNameWithoutExtension(file.Path);      
 
-                ExternalPrograms.RunCompiler($"-c {file.Path} -o {objFolder}/{fileName}.o {includes}");
+                ExternalPrograms.RunCompiler($"-c {file.Path} -o {objFolder}/{fileName}.o {includes} {propStr}");
             }
 
             var objFiles = Directory.GetFiles(objFolder)
@@ -189,10 +190,16 @@ namespace CBuildSystem.Model
             StringBuilder sb = new StringBuilder();
 
             foreach(string append in Properties.Properties
-                                               .Where(prop=>prop.IsUsed)
+                                               .Where(prop=>prop.IsUsed && !prop.IsSpecialFormat)
                                                .Select(prop=>prop.StringParametr))
             {
                 sb.Append($" {append}");
+            }
+
+            foreach(CompilerProperty p in Properties.Properties
+                                               .Where(prop=>prop.IsUsed && prop.IsSpecialFormat))
+            {
+                sb.Append($" {p.StringParametr}{p.Value.ToString()}");
             }
 
             return sb.ToString();
