@@ -122,6 +122,11 @@ namespace CBuildSystem
             }
 
             p.IncludeFolders.Add($"{projLoc}/headers");
+            
+            if(!Directory.Exists($"{projLoc}/scripts"))
+            {
+                Directory.CreateDirectory($"{projLoc}/scripts");
+            }
 
             p.SaveProject();
         }

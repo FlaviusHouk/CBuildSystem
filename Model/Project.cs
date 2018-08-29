@@ -118,6 +118,11 @@ namespace CBuildSystem.Model
                 Directory.CreateDirectory(objFolder);
             }
 
+            if(File.Exists($"{projectLocation}/scripts/prebuildScript.sh"))
+            {
+                Console.Write(ExternalPrograms.RunScript($"{projectLocation}/scripts/prebuildScript.sh"));
+            }
+
             System.Console.WriteLine("Builing...");
 
             foreach(SourceFile file in SourceFiles)
@@ -147,6 +152,11 @@ namespace CBuildSystem.Model
                 sb.Append($"-o {binFolder}/{outName}.lef");
 
                 ExternalPrograms.RunCompiler(sb.ToString());
+
+                if(File.Exists($"{projectLocation}/scripts/postbuildScript.sh"))
+                {
+                    Console.Write(ExternalPrograms.RunScript($"{projectLocation}/scripts/postbuildScript.sh"));
+                }
             }
         }
 

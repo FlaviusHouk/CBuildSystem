@@ -48,5 +48,22 @@ namespace CBuildSystem.Helpers
 
             return toRet;
         }
+
+        internal static string RunScript(string script)
+        {
+            ProcessStartInfo info = new ProcessStartInfo("sh");
+            
+            info.RedirectStandardOutput = true;
+            info.RedirectStandardError = true;
+            info.Arguments = $"{script} 2>&1";
+
+            Process proc = Process.Start(info);
+
+            proc.WaitForExit();
+
+            string toRet = proc.StandardOutput.ReadToEnd();
+
+            return toRet;
+        }
     }
 }
