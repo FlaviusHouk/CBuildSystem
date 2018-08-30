@@ -69,7 +69,7 @@ namespace CBuildSystem.Model
         [XmlArray("SystemDependencies"), XmlArrayItem(typeof(string))]
         public List<string> SystemDeps { get; } = new List<string>();
 
-        public ProjectProperties Properties { get; } = new ProjectProperties();
+        public ProjectProperties Properties { get; private set; } = new ProjectProperties();
 
         #endregion
 
@@ -228,16 +228,17 @@ namespace CBuildSystem.Model
             XmlSerializer serializer = new XmlSerializer(typeof(string), new XmlRootAttribute(typeof(string).Name.ToLower()));
             _loc = serializer.Deserialize(reader) as string;
 
-            serializer = new XmlSerializer(typeof(List<SourceFile>));
+            serializer = new XmlSerializer(typeof(List<SourceFile>), new XmlRootAttribute("SourceFiles"));
             SourceFiles.AddRange(serializer.Deserialize(reader) as List<SourceFile>);
-
-            reader.Read();
 
             serializer = new XmlSerializer(typeof(List<string>), new XmlRootAttribute("IncludeFolders"));
             IncludeFolders.AddRange(serializer.Deserialize(reader) as List<string>);
 
             serializer = new XmlSerializer(typeof(List<string>), new XmlRootAttribute("SystemDependencies"));
             SystemDeps.AddRange(serializer.Deserialize(reader) as List<string>);
+
+            serializer = new XmlSerializer(typeof(ProjectProperties), new XmlRootAttribute("ProjectProperties"));
+            Properties = serializer.Deserialize(reader) as ProjectProperties;
         }
 
         public void WriteXml(XmlWriter writer)
@@ -248,7 +249,7 @@ namespace CBuildSystem.Model
             XmlSerializer serializer = new XmlSerializer(typeof(string));
             serializer.Serialize(writer, _loc);
 
-            serializer = new XmlSerializer(typeof(List<SourceFile>));
+            serializer = new XmlSerializer(typeof(List<SourceFile>), new XmlRootAttribute("SourceFiles"));
             serializer.Serialize(writer, SourceFiles, ns);
 
             serializer = new XmlSerializer(typeof(List<string>), new XmlRootAttribute("IncludeFolders"));
