@@ -44,6 +44,8 @@ namespace CBuildSystem.Model
 
             XmlSerializer serializer = new XmlSerializer(typeof(string), new XmlRootAttribute(nameof(Path)));
             _path = serializer.Deserialize(reader) as string;
+
+            reader.Read();
         }
 
         public void WriteXml(XmlWriter writer)

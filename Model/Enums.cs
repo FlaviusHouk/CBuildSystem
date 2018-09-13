@@ -2,6 +2,35 @@ using System;
 
 namespace CBuildSystem.Model
 {
+    public enum GCCPropertiesEnum
+    {
+        UseAnsiProperty,
+        StandardProperty,
+        GNU89InlineProperty,
+        StandardFLTEvalProperty,
+        AuxInfoProperty,
+        ParameterlessVariadicFunctionsAllowedProperty,
+        FNO_ASMProperty,
+        BuiltFuncIgnoredProperty,
+        GimpleProperty,
+        RunEnvironmetProperty,
+        OpenACCProperty,
+        OpenACCDimProperty,
+        OpenMPProperty,
+        OpenMPSimdProperty,
+        GNU_TMProperty,
+        MSExtensionsProperty,
+        Plan9ExtensionsProperty,
+        CondMismatchProperty,
+        FlaxVectorConversationProperty,
+        CharAlwaysSignedProperty,
+        CharAlwaysUnSignedProperty,
+        EndianProperty
+
+
+        
+    }
+
     public enum CStandardEnum
     {
         C89,
@@ -19,5 +48,12 @@ namespace CBuildSystem.Model
     {
         Hosting,
         FreeStanding
+    }
+
+    public enum EndianEnum
+    {
+        BigEndian,
+        LittleEndian,
+        Native
     }
 }

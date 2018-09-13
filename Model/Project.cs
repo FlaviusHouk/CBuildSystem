@@ -8,6 +8,8 @@ using System.Linq;
 using System.Diagnostics;
 using System.Text;
 
+using CBuildSystem.Helpers;
+
 namespace CBuildSystem.Model
 {
     [Serializable]
@@ -67,7 +69,7 @@ namespace CBuildSystem.Model
         [XmlArray("SystemDependencies"), XmlArrayItem(typeof(string))]
         public List<string> SystemDeps { get; } = new List<string>();
 
-        public ProjectProperties Properties { get; } = new ProjectProperties();
+        public ProjectProperties Properties { get; private set; } = new ProjectProperties();
 
         #endregion
 
@@ -109,10 +111,16 @@ namespace CBuildSystem.Model
             string objFolder = Path.Combine(projectLocation, "obj");
             string binFolder = Path.Combine(projectLocation, "bin");
             string includes = BuildIncludeString().Trim('\n');
+            string propStr = BuildPropertiesString().Trim('\n');
 
             if(!Directory.Exists(objFolder))
             {
                 Directory.CreateDirectory(objFolder);
+            }
+
+            if(File.Exists($"{projectLocation}/scripts/prebuildScript.sh"))
+            {
+                Console.Write(ExternalPrograms.RunScript($"{projectLocation}/scripts/prebuildScript.sh"));
             }
 
             System.Console.WriteLine("Builing...");
@@ -121,7 +129,7 @@ namespace CBuildSystem.Model
             {
                 string fileName = Path.GetFileNameWithoutExtension(file.Path);      
 
-                RunGCC($"-c {file.Path} -o {objFolder}/{fileName}.o {includes}");
+                ExternalPrograms.RunCompiler($"-c {file.Path} -o {objFolder}/{fileName}.o {includes} {propStr}");
             }
 
             var objFiles = Directory.GetFiles(objFolder)
@@ -143,26 +151,17 @@ namespace CBuildSystem.Model
 
                 sb.Append($"-o {binFolder}/{outName}.lef");
 
-                RunGCC(sb.ToString());
+                ExternalPrograms.RunCompiler(sb.ToString());
+
+                if(File.Exists($"{projectLocation}/scripts/postbuildScript.sh"))
+                {
+                    Console.Write(ExternalPrograms.RunScript($"{projectLocation}/scripts/postbuildScript.sh"));
+                }
             }
         }
 
         #endregion
-        private void RunGCC(string args)
-        {
-                ProcessStartInfo info = new ProcessStartInfo("gcc");
-                info.Arguments = args;
-                info.RedirectStandardOutput = true;
-                info.RedirectStandardError = true;
-
-                Console.WriteLine(args);
-
-                Process proc = Process.Start(info);
-
-                proc.WaitForExit();
-
-                Console.Write(proc.StandardError.ReadToEnd());
-        }
+        
 
 
         private string BuildIncludeString()
@@ -176,7 +175,7 @@ namespace CBuildSystem.Model
 
             foreach(string dep in SystemDeps)
             {
-                includes.Append($" {RunPkgConfig(dep, true)}");
+                includes.Append($" {ExternalPrograms.RunPkgConfig(dep, true)}");
             }          
 
             return includes.ToString();
@@ -190,38 +189,30 @@ namespace CBuildSystem.Model
 
             foreach(string dep in SystemDeps)
             {
-                includes.Append($" {RunPkgConfig(dep, false)}");
+                includes.Append($" {ExternalPrograms.RunPkgConfig(dep, false)}");
             }          
 
             return includes.ToString();
         }
 
-        private string RunPkgConfig(string pkgName, bool include)
+        private string BuildPropertiesString()
         {
-            ProcessStartInfo info = new ProcessStartInfo("pkg-config");
+            StringBuilder sb = new StringBuilder();
 
-            if(include)
+            foreach(string append in Properties.Properties
+                                               .Where(prop=>prop.IsUsed && !prop.IsSpecialFormat)
+                                               .Select(prop=>prop.StringParametr))
             {
-                info.Arguments = $" --cflags {pkgName}";
+                sb.Append($" {append}");
             }
-            else
+
+            foreach(CompilerProperty p in Properties.Properties
+                                               .Where(prop=>prop.IsUsed && prop.IsSpecialFormat))
             {
-                info.Arguments = $" --libs {pkgName}";
+                sb.Append($" {p.StringParametr}{p.Value.ToString()}");
             }
-            
-            info.RedirectStandardOutput = true;
-            info.RedirectStandardError = true;
 
-            Process proc = Process.Start(info);
-
-            proc.WaitForExit();
-
-            string toRet = proc.StandardOutput.ReadToEnd();
-
-            if(string.IsNullOrEmpty(toRet) || toRet.Contains("not found"))
-                throw new Exception($"Could not locate {pkgName} in current system");
-
-            return toRet;
+            return sb.ToString();
         }
 
         #region Serialization
@@ -237,16 +228,17 @@ namespace CBuildSystem.Model
             XmlSerializer serializer = new XmlSerializer(typeof(string), new XmlRootAttribute(typeof(string).Name.ToLower()));
             _loc = serializer.Deserialize(reader) as string;
 
-            serializer = new XmlSerializer(typeof(List<SourceFile>));
+            serializer = new XmlSerializer(typeof(List<SourceFile>), new XmlRootAttribute("SourceFiles"));
             SourceFiles.AddRange(serializer.Deserialize(reader) as List<SourceFile>);
-
-            reader.Read();
 
             serializer = new XmlSerializer(typeof(List<string>), new XmlRootAttribute("IncludeFolders"));
             IncludeFolders.AddRange(serializer.Deserialize(reader) as List<string>);
 
             serializer = new XmlSerializer(typeof(List<string>), new XmlRootAttribute("SystemDependencies"));
             SystemDeps.AddRange(serializer.Deserialize(reader) as List<string>);
+
+            serializer = new XmlSerializer(typeof(ProjectProperties), new XmlRootAttribute("ProjectProperties"));
+            Properties = serializer.Deserialize(reader) as ProjectProperties;
         }
 
         public void WriteXml(XmlWriter writer)
@@ -257,7 +249,7 @@ namespace CBuildSystem.Model
             XmlSerializer serializer = new XmlSerializer(typeof(string));
             serializer.Serialize(writer, _loc);
 
-            serializer = new XmlSerializer(typeof(List<SourceFile>));
+            serializer = new XmlSerializer(typeof(List<SourceFile>), new XmlRootAttribute("SourceFiles"));
             serializer.Serialize(writer, SourceFiles, ns);
 
             serializer = new XmlSerializer(typeof(List<string>), new XmlRootAttribute("IncludeFolders"));
@@ -265,6 +257,9 @@ namespace CBuildSystem.Model
 
             serializer = new XmlSerializer(typeof(List<string>), new XmlRootAttribute("SystemDependencies"));
             serializer.Serialize(writer, SystemDeps, ns);
+
+            serializer = new XmlSerializer(typeof(ProjectProperties), new XmlRootAttribute("ProjectProperties"));
+            serializer.Serialize(writer, Properties);
         }
 
         #endregion
