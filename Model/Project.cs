@@ -123,9 +123,22 @@ namespace CBuildSystem.Model
                 Console.Write(ExternalPrograms.RunScript($"{projectLocation}/scripts/prebuildScript.sh"));
             }
 
+            IEnumerable<SourceFile> viewCode = null;
+            if(SourceFiles.Any(f=>f.FileType == SourceCodeType.View))
+            {
+                IEnumerable<string> viewFiles = SourceFiles
+                                          .Where(f=>f.FileType == SourceCodeType.View)
+                                          .Select(f=>f.Path);
+
+                GMLInterface.ProcessFiles(viewFiles, IncludeFolders.First());
+
+                //viewCode = viewFiles.Select(f=>$"{Path.GetFileName(f)}.g.c");
+                //SourceFiles.AddRange();
+            }
+
             System.Console.WriteLine("Builing...");
 
-            foreach(SourceFile file in SourceFiles)
+            foreach(SourceFile file in SourceFiles.Where(f=>f.FileType == SourceCodeType.Code))
             {
                 string fileName = Path.GetFileNameWithoutExtension(file.Path);      
 
@@ -161,8 +174,6 @@ namespace CBuildSystem.Model
         }
 
         #endregion
-        
-
 
         private string BuildIncludeString()
         {

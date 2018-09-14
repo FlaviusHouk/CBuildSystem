@@ -11,6 +11,30 @@ namespace CBuildSystem.Model
         private string _path;
 
         public string Path { get => _path; set => _path = value; }
+        public SourceCodeType FileType
+        {
+            get
+            {
+                string name = System.IO.Path.GetFileNameWithoutExtension(Path);
+                string fullName = System.IO.Path.GetFileName(Path);
+
+                string fullExt = fullName.Remove(name.Length);
+
+                if(string.Equals(fullExt, ".c") || string.Equals(fullExt, ".g.c")
+                  || string.Equals(fullExt, ".h") || string.Equals(fullExt, ".g.h"))
+                {
+                    return SourceCodeType.Code;
+                }
+                else if(string.Equals(fullExt, ".gml"))
+                {
+                    return SourceCodeType.View;
+                }
+                else
+                {
+                    return SourceCodeType.Resource;
+                }
+            }
+        }
 
         public SourceFile(string path)
         {

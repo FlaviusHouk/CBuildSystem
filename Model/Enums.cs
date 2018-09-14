@@ -56,4 +56,11 @@ namespace CBuildSystem.Model
         LittleEndian,
         Native
     }
+
+    public enum SourceCodeType
+    {
+        Code,
+        View,
+        Resource
+    }
 }

@@ -13,8 +13,6 @@ namespace CBuildSystem.Model
         [XmlArray("CompilerProperties"), XmlArrayItem(typeof(CompilerProperty))]
         internal List<CompilerProperty> Properties { get; } 
            = new List<CompilerProperty>();
-
-
         private void AddGCCProps()
         {
             Properties.Add(new CompilerProperty(GCCPropertiesEnum.UseAnsiProperty, "-ansi"));
