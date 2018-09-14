@@ -132,17 +132,26 @@ namespace CBuildSystem.Model
 
                 GMLInterface.ProcessFiles(viewFiles, IncludeFolders.First());
 
-                //viewCode = viewFiles.Select(f=>$"{Path.GetFileName(f)}.g.c");
-                //SourceFiles.AddRange();
+                viewCode = viewFiles.Select(f=>new SourceFile($"{Path.GetDirectoryName(f)}/{Path.GetFileNameWithoutExtension(f)}.g.c")).ToArray();
+                SourceFiles.AddRange(viewCode);
             }
 
             System.Console.WriteLine("Builing...");
 
             foreach(SourceFile file in SourceFiles.Where(f=>f.FileType == SourceCodeType.Code))
             {
-                string fileName = Path.GetFileNameWithoutExtension(file.Path);      
+                string fileName = System.IO.Path.GetFileName(file.Path).Split('.',StringSplitOptions.RemoveEmptyEntries)[0];      
 
                 ExternalPrograms.RunCompiler($"-c {file.Path} -o {objFolder}/{fileName}.o {includes} {propStr}");
+            }
+
+            if(viewCode != null)
+            {
+                foreach(SourceFile viewFile in viewCode)
+                {
+                    SourceFiles.Remove(viewFile);
+                }
+                viewCode = null;
             }
 
             var objFiles = Directory.GetFiles(objFolder)

@@ -15,10 +15,10 @@ namespace CBuildSystem.Model
         {
             get
             {
-                string name = System.IO.Path.GetFileNameWithoutExtension(Path);
+                string name = System.IO.Path.GetFileName(Path).Split('.',StringSplitOptions.RemoveEmptyEntries)[0];
                 string fullName = System.IO.Path.GetFileName(Path);
 
-                string fullExt = fullName.Remove(name.Length);
+                string fullExt = fullName.Remove(0  ,name.Length);
 
                 if(string.Equals(fullExt, ".c") || string.Equals(fullExt, ".g.c")
                   || string.Equals(fullExt, ".h") || string.Equals(fullExt, ".g.h"))

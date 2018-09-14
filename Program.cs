@@ -102,8 +102,7 @@ namespace CBuildSystem
 
             if(Directory.Exists($"{projLoc}/src"))
             {
-                var sources = Directory.GetFiles($"{projLoc}/src")
-                                       .Where(file => string.Compare(Path.GetExtension(file), ".c") == 0);
+                var sources = Directory.GetFiles($"{projLoc}/src");
 
                 foreach(string sourceFile in sources)
                 {

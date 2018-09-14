@@ -13,6 +13,7 @@ namespace CBuildSystem.Helpers
 
         public static void ProcessFiles(IEnumerable<string> files, string pathToHeaders)
         {
+            _parser = new Parser();
             foreach (string file in files)
             {
                 string CCode = string.Empty;
