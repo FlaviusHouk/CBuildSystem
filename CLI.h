@@ -13,13 +13,17 @@ typedef struct _commandInfo
 	GPtrArray* _processList;
 } CommandInfo;
 
-CommandInfo* CommandInfo_New(GString* command, int argsCount, int order);
+CommandInfo* CommandInfo_New(GString* command, int argsCount, int order, void (*action)(CommandInfo* com));
 
-GString* CommandInfo_GetCommand();
-void CommandInfo_SetCommand(GString* value);
+GString* CommandInfo_GetCommand(CommandInfo* this);
+void CommandInfo_SetCommand(CommandInfo* this, GString* value);
 
-int CommandInfo_GetArgsCount();
-void CommandInfo_SetArgsCount(int value);
+int CommandInfo_GetArgsCount(CommandInfo* this);
+void CommandInfo_SetArgsCount(CommandInfo* this, int value);
 
-int CommandInfo_GetOrder();
-void CommandInfo_SetOrder(int value);
+int CommandInfo_GetOrder(CommandInfo* this);
+void CommandInfo_SetOrder(CommandInfo* this, int value);
+
+GPtrArray* CommandInfo_GetArgs(CommandInfo* this);
+GPtrArray* CommandInfo_GetProcessList(CommandInfo* this);
+
