@@ -12,7 +12,7 @@ CommandInfo* CommandInfo_New(GString* command, int argsCount, int order, void (*
 	this->_order = order;
 
 	this->_args = g_ptr_array_new();
-	this->_processList = g_ptr_array_new();
+	this->_action = action;
 
 	return this;
 }
@@ -52,9 +52,10 @@ GPtrArray* CommandInfo_GetArgs(CommandInfo* this)
 	return this->_args;
 }
 
-GPtrArray* CommandInfo_GetProcessList(CommandInfo* this)
+void CommandInfo_ProcessCommand(CommandInfo* this)
 {
-	return this->_processList;
+	if(this->_action != NULL)
+		this->_action(this);
 }
 
 static GPtrArray* AvailableCommands;

@@ -10,7 +10,7 @@ typedef struct _commandInfo
 	int _order;
 
 	GPtrArray* _args;
-	GPtrArray* _processList;
+	void (*_action)(struct _commandInfo* com);
 } CommandInfo;
 
 CommandInfo* CommandInfo_New(GString* command, int argsCount, int order, void (*action)(CommandInfo* com));
@@ -25,5 +25,5 @@ int CommandInfo_GetOrder(CommandInfo* this);
 void CommandInfo_SetOrder(CommandInfo* this, int value);
 
 GPtrArray* CommandInfo_GetArgs(CommandInfo* this);
-GPtrArray* CommandInfo_GetProcessList(CommandInfo* this);
+void CommandInfo_ProcessCommand(CommandInfo* this);
 
