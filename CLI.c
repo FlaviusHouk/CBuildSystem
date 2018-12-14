@@ -63,13 +63,49 @@ static GPtrArray* AvailableCommands;
 static void ProcessCreateCommand(CommandInfo* command)
 {}
 
+static void ProcessAddCommand(CommandInfo* command)
+{}
+
+static void ProcessDeleteCommand(CommandInfo* command)
+{}
+
+static void ProcessAddDepCommand(CommandInfo* command)
+{}
+
+static void ProcessBuildCommand(CommandInfo* command)
+{}
+
 static void InitializeStatics()
 {
 	AvailableCommands = g_ptr_array_new();
 
 	g_ptr_array_add(AvailableCommands, 
-					CommandInfo_New(g_string_new("--create"),
-									1,
-									1,
-								    ProcessCreateCommand));
+			CommandInfo_New(g_string_new("--create"),
+					1,
+					1,
+					ProcessCreateCommand));
+
+	g_ptr_array_add(AvailableCommands,
+			CommandInfo_New(g_string_new("--addFile"),
+					-1,
+					2,
+					ProcessAddCommand);
+
+	g_ptr_array_add(AvailableCommands,
+			CommandInfo_New(g_string_new("--deleteFile",
+					-1
+					3,
+					ProcessDeleteCommand));
+
+	g_ptr_array_add(AvailableCommands,
+			CommandInfo_New(g_string_new("--addDependency"),
+					1,
+					4,
+					ProcessAddDepCommand));
+
+	g_ptr_array_add(AvailableCommands,
+			CommandInfo_New(g_string_new("--build"),
+					-1,
+					5,
+					ProcessBuildCommand));
 }
